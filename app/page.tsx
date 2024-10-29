@@ -1,27 +1,35 @@
-"use client"
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+
+// Define the structure of the client data
+interface Client {
+  _id: string;
+  name: string;
+  // Optionally add other fields here if needed, e.g., nextSession: string
+};
 
 const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [clients, setClients] = useState<Client[]>([]); // Type the state as an array of Client objects
 
-  const clients = [
-  {
-    id: "1",
-    name: "Alex Smith",
-    nextSession: "2023-11-02T10:00:00Z",
-  },
-  {
-    id: "2",
-    name: "Jamie Doe",
-    nextSession: "2023-11-05T14:30:00Z",
-  },
-  {
-    id: "3",
-    name: "Jordan Brown",
-    nextSession: "2023-11-10T09:00:00Z",
-  },
-];
+  // Fetch clients data from /clients route
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await fetch("/api/clients");
+        if (!response.ok) throw new Error("Failed to fetch clients");
+
+        const data: Client[] = await response.json(); // Type the fetched data as an array of Client objects
+        setClients(data);
+        console.log(data);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   // Function to filter clients based on the search term
   const filteredClients = clients.filter((client) =>
@@ -53,18 +61,12 @@ const Dashboard = () => {
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul role="list" className="divide-y divide-gray-200">
             {filteredClients.map((client) => (
-              <li key={client.id}>
-                <Link href={`/clients/${client.id}`} passHref>
+              <li key={client._id}>
+                <Link href={`/clients/${client._id}`} passHref>
                   <div className="block hover:bg-gray-50">
                     <div className="px-4 py-4 sm:px-6 flex justify-between items-center">
                       <div className="text-lg font-medium text-blue-600">
                         {client.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        Next Session:{" "}
-                        <span className="font-semibold">
-                          {new Date(client.nextSession).toLocaleDateString()}
-                        </span>
                       </div>
                       <div className="text-gray-500">
                         <svg

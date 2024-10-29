@@ -14,3 +14,15 @@ export const POST = async (req: NextRequest) => {
     await client.save();
     return new NextResponse(JSON.stringify(client), { status: 200 });    
 }
+
+// GET request to retrieve all clients
+export const GET = async () => {
+    await connectDB();
+    try {
+        const clients = await ClientModel.find();
+        return new NextResponse(JSON.stringify(clients), { status: 200 });
+    } catch (error) {
+        console.error("Error fetching clients:", error);
+        return new NextResponse(JSON.stringify({ error: "Failed to fetch clients" }), { status: 500 });
+    }
+};

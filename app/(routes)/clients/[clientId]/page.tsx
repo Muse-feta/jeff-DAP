@@ -28,7 +28,10 @@ interface SessionData {
   };
 }
 
-function SessionForm() {
+function SessionForm({params}: {params: {clientId: string}}) {
+  console.log("clientId", params.clientId);
+  const clientId = params.clientId
+  
   const [sessionData, setSessionData] = useState<SessionData>({
     date: new Date().toISOString().split("T")[0], // Defaults to today's date
     data: {
@@ -54,6 +57,8 @@ function SessionForm() {
       nextSession: new Date().toISOString().split("T")[0],
     },
   });
+
+  console.log("client sessionData",sessionData)
 
   // Handle input changes
   const handleChange = (
@@ -81,10 +86,58 @@ function SessionForm() {
     });
   };
 
+  console.log(sessionData);
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(sessionData);
+
+    try {
+      const response = await fetch(`/api/sessions/${clientId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(sessionData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit session data");
+      }
+
+      const result = await response.json();
+      console.log("Session data submitted successfully:", result);
+
+      // Optionally reset form or navigate, etc.
+      setSessionData({
+        date: new Date().toISOString().split("T")[0], // Reset to today's date
+        data: {
+          presentingProblem: "",
+          mentalStatus: "",
+          appearance: "",
+          interventionsUsed: "",
+          clientResponse: "",
+          screenerResults: "",
+        },
+        assessment: {
+          diagnosis: "",
+          selfHarmRisk: "Low",
+          suicidalThoughts: "None",
+          homicidalThoughts: "None",
+          progress: "",
+          goalChanges: "",
+        },
+        plan: {
+          homework: "",
+          referrals: "",
+          takeaways: "",
+          nextSession: new Date().toISOString().split("T")[0],
+        },
+      });
+    } catch (error) {
+      console.error("Error submitting session data:", error);
+      // Optionally, show an error message to the user
+    }
   };
 
   return (
