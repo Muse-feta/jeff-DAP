@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface SessionData {
   date: string;
@@ -36,14 +37,19 @@ interface Client {
 }
 
 const Page = ({ params }: { params: { clientId: string } }) => {
+  const router = useRouter();
   const clientId = params.clientId;
   const [session, setSession] = useState<SessionData[] | undefined>(undefined);
   const [clientInfo, setClientInfo] = useState<Client | null>(null);
   const [openSessionIndex, setOpenSessionIndex] = useState<number | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
   const toggleAccordion = (index: number) => {
     setOpenSessionIndex(openSessionIndex === index ? null : index);
   };
+
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,6 +108,30 @@ const Page = ({ params }: { params: { clientId: string } }) => {
     fetchSessions();
   }, [clientId]);
 
+   const handleDelete = async () => {
+     setIsLoading(true);
+     setError(null);
+
+     try {
+       const response = await fetch(`/api/clients/${clientId}`, {
+         method: "DELETE",
+       });
+
+       if (!response.ok) {
+         throw new Error("Failed to delete client");
+       }
+
+       // Optionally handle successful deletion, e.g., update UI or notify parent component
+
+       router.push("/");
+     } catch (error: any) {
+       setError(error.message);
+       alert(error.message);
+     } finally {
+       setIsLoading(false);
+     }
+   };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Client Sessions</h1>
@@ -120,6 +150,18 @@ const Page = ({ params }: { params: { clientId: string } }) => {
               <span className="font-semibold">Referral Source:</span>{" "}
               {clientInfo.referralSource}
             </p>
+          </div>
+          <div>
+            {error && <p className="text-red-500">{error}</p>}
+            <button
+              onClick={handleDelete}
+              disabled={isLoading}
+              className={`px-4 py-2 text-white ${
+                isLoading ? "bg-gray-500" : "bg-red-500 hover:bg-red-700 m-3"
+              } rounded`}
+            >
+              {isLoading ? "Deleting..." : "Delete Client"}
+            </button>
           </div>
         </div>
       )}

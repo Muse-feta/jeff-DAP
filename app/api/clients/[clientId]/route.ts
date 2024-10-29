@@ -46,3 +46,50 @@ export const GET = async (
     );
   }
 };
+
+export const DELETE = async (
+  req: NextRequest,
+  { params }: { params?: { clientId: string } }
+) => {
+  try {
+    // Connect to the database
+    await connectDB();
+
+    // Check if params and clientId are defined
+    if (!params || !params.clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const { clientId } = params;
+
+    // Check if clientId is a valid ObjectId
+    if (!mongoose.isValidObjectId(clientId)) {
+      return NextResponse.json(
+        { error: "Invalid Client ID format" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the client from the database
+    const deletedClient = await ClientModel.findByIdAndDelete(clientId);
+
+    if (!deletedClient) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
+
+    // Return success response
+    return NextResponse.json(
+      { message: "Client deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting client:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+};
