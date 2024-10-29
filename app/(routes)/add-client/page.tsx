@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AddClientForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     dateOfBirth: "",
@@ -36,6 +38,7 @@ export default function AddClientForm() {
           gender: "",
           referralSource: "",
         });
+        router.push('/');
       } else {
         alert("Error adding client.");
       }

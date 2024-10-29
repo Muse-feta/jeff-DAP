@@ -41,28 +41,13 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Client Dashboard</h1>
-          <Link href="/add-client">
-            <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
-              Add New Client
-            </button>
-          </Link>
         </header>
-
-        <div className="flex mb-6">
-          <input
-            type="text"
-            placeholder="Search clients..."
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
 
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul role="list" className="divide-y divide-gray-200">
             {filteredClients.map((client) => (
               <li key={client._id}>
-                <Link href={`/clients/${client._id}`} passHref>
+                <Link href={`/sessions/${client._id}`} passHref>
                   <div className="block hover:bg-gray-50">
                     <div className="px-4 py-4 sm:px-6 flex justify-between items-center">
                       <div className="text-lg font-medium text-blue-600">
@@ -91,6 +76,11 @@ const Dashboard = () => {
             ))}
           </ul>
         </div>
+        <Link href="/add-client">
+          <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full mt-2">
+            Add New Client
+          </button>
+        </Link>
       </div>
     </div>
   );

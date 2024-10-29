@@ -1,5 +1,7 @@
 "use client";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // Define types for the session data structure
 interface SessionData {
@@ -28,14 +30,10 @@ interface SessionData {
   };
 }
 
-interface Client {
-  _id: string;
-  name: string;
-  dateOfBirth: string;
-  referralSource: string; 
-};
+
 
 function SessionForm({params}: {params: {clientId: string}}) {
+  const router = useRouter();
   console.log("clientId", params.clientId);
   const clientId = params.clientId
   
@@ -65,45 +63,11 @@ function SessionForm({params}: {params: {clientId: string}}) {
     },
   });
 
-const [session, setSession] = useState<SessionData[] | undefined>(undefined);
-  const [clientInfo, setClientInfo] = useState<Client[]>([]);
+
 
   console.log("client sessionData",sessionData)
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await fetch("/api/clients");
-        if (!response.ok) throw new Error("Failed to fetch clients");
 
-        const data: Client[] = await response.json(); // Type the fetched data as an array of Client objects
-        setClientInfo(data);
-        console.log("client Info",data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      }
-    };
-
-       
-
-    fetchClients();
-  }, []);
-
-  useEffect(() => {
-     const fetchSessions = async () => {
-       try {
-         const response = await fetch(`/api/sessions/${clientId}`);
-         if (!response.ok) throw new Error("Failed to fetch clients");
-
-         const data: SessionData[] = await response.json(); // Type the fetched data as an array of Client objects
-         setSession(data);
-         console.log("session info",data);
-       } catch (error) {
-         console.error("Error fetching clients:", error);
-       }
-     };
-     fetchSessions();
-  },[])
 
   // Handle input changes
   const handleChange = (
@@ -175,6 +139,8 @@ const [session, setSession] = useState<SessionData[] | undefined>(undefined);
           nextSession: new Date().toISOString().split("T")[0],
         },
       });
+
+      router.push(`/sessions/${clientId}`);
     } catch (error) {
       console.error("Error submitting session data:", error);
       // Optionally, show an error message to the user
@@ -184,81 +150,6 @@ const [session, setSession] = useState<SessionData[] | undefined>(undefined);
   return (
     <div className="bg-gray-50">
       <div>
-        {session?.map((sessionItem) => (
-          <div
-            key={sessionItem.date}
-            className="max-w mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mb-4"
-          >
-            <div className="p-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">
-                {sessionItem.date}
-              </h2>
-
-              <h3 className="text-md font-semibold text-gray-700">
-                Presenting Problem:
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {sessionItem.data.presentingProblem}
-              </p>
-
-              <h3 className="text-md font-semibold text-gray-700">
-                Mental Status:
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {sessionItem.data.mentalStatus}
-              </p>
-
-              <h3 className="text-md font-semibold text-gray-700">
-                Assessment:
-              </h3>
-              <p className="text-gray-600 mb-2">
-                Diagnosis:{" "}
-                <span className="font-semibold">
-                  {sessionItem.assessment.diagnosis}
-                </span>
-              </p>
-              <p className="text-gray-600 mb-2">
-                Self Harm Risk:{" "}
-                <span className="font-semibold">
-                  {sessionItem.assessment.selfHarmRisk}
-                </span>
-              </p>
-              <p className="text-gray-600 mb-2">
-                Suicidal Thoughts:{" "}
-                <span className="font-semibold">
-                  {sessionItem.assessment.suicidalThoughts}
-                </span>
-              </p>
-              <p className="text-gray-600 mb-2">
-                Homicidal Thoughts:{" "}
-                <span className="font-semibold">
-                  {sessionItem.assessment.homicidalThoughts}
-                </span>
-              </p>
-              <p className="text-gray-600 mb-2">
-                Progress:{" "}
-                <span className="font-semibold">
-                  {sessionItem.assessment.progress}
-                </span>
-              </p>
-
-              <h3 className="text-md font-semibold text-gray-700">Plan:</h3>
-              <p className="text-gray-600 mb-2">
-                Homework:{" "}
-                <span className="font-semibold">
-                  {sessionItem.plan.homework}
-                </span>
-              </p>
-              <p className="text-gray-600 mb-2">
-                Next Session:{" "}
-                <span className="font-semibold">
-                  {sessionItem.plan.nextSession}
-                </span>
-              </p>
-            </div>
-          </div>
-        ))}
-
         {/** Add session form */}
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
           <form
@@ -266,7 +157,7 @@ const [session, setSession] = useState<SessionData[] | undefined>(undefined);
             className="bg-white shadow-md rounded-lg p-8 w-full max-w-lg"
           >
             <h2 className="text-2xl font-bold mb-6 text-center">
-              Session Details
+              Create Session
             </h2>
 
             {/* Session Date */}
@@ -470,10 +361,16 @@ const [session, setSession] = useState<SessionData[] | undefined>(undefined);
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+              className="w-full mb-3 bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
             >
               Submit Session
             </button>
+            <Link
+              href="/"
+              className="w-full mt-3 bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+            >
+              Back To Home
+            </Link>
           </form>
         </div>
       </div>
