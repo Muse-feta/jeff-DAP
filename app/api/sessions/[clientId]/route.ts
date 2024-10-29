@@ -65,3 +65,43 @@ export const POST = async (req: NextRequest, {params}: {params: {clientId: strin
     );
   }
 };
+
+export const GET = async (
+  req: NextRequest,
+  { params }: { params?: { clientId: string } }
+) => {
+  // Check if params and clientId are defined
+  if (!params || !params.clientId) {
+    return new NextResponse(JSON.stringify({ error: "clientId is required" }), {
+      status: 400,
+    });
+  }
+
+  var clientId = params.clientId;
+
+  try {
+    await connectDB();
+    // Convert clientId to ObjectId type
+    const objectId = new mongoose.Types.ObjectId(clientId);
+    console.log("objectId", objectId);
+
+    // Find the session by clientId
+    const session = await SessionModel.find({ clientId: objectId });
+
+    // Return the session data if found
+    if (!session) {
+      return new NextResponse(JSON.stringify({ error: "Session not found" }), {
+        status: 404,
+      });
+    }
+
+    return new NextResponse(JSON.stringify(session), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching session:", error);
+    return new NextResponse(
+      JSON.stringify({ error: "Failed to fetch session" }),
+      { status: 500 }
+    );
+  }
+};
+
