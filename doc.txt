@@ -1,0 +1,242 @@
+Wireframes
+Each wireframe represents a core screen in the app. Below, I’ll provide a brief description of each one:
+
+1. Login Page
+Purpose: Allows therapists to securely log into the app.
+
+Fields:
+Email
+Password
+Buttons:
+Log In
+“Forgot Password?” link
+Option for two-factor authentication (if implemented)
+2. Dashboard
+Purpose: Displays an overview of clients and upcoming sessions.
+
+#################### Components: #############
+Client List: Table of clients with basic details (name, next session date).
+Add Client Button: A button to add a new client profile.
+Search Bar: To filter or search for clients.
+Upcoming Sessions: List of sessions scheduled for the next few days.
+3. Client Profile Page
+Purpose: View client details, access past sessions, and add new sessions.
+
+Sections:
+Client Information: Basic details (name, age, DOB, referral source).
+Session History: List of past sessions with date and summary.
+Add New Session Button: To create a new DAP note for the client.
+4. New Session / DAP Note Page
+Purpose: Allows therapists to document a session.
+
+Fields:
+Data:
+Presenting Problem/Updates
+Mental Status
+Appearance and Hygiene
+Interventions Used
+Client Response
+Screener Results (optional)
+Assessment:
+Diagnosis (text field)
+Self-Harm/Suicidal/Homicidal Evaluations
+Progress Summary
+Plan:
+Homework Assignment
+Referrals (optional)
+Takeaways
+Next Session Date/Time
+Buttons:
+Save Session
+Return to Client Profile
+5. Progress Report Page
+Purpose: Generates and displays a summary of sessions for a client.
+
+Components:
+Session Timeline: Each session displayed in sequence, showing dates and brief summaries.
+Generate PDF Button: Allows for downloading or printing a report of the sessions.
+Return to Client Profile button.
+API Design (Next.js API Routes and MongoDB)
+Here's a RESTful API setup that aligns with your project requirements. Each endpoint serves a specific function, including managing clients, handling sessions, and authenticating users.
+
+1. Authentication Endpoints
+These routes are for login, registration, and session handling.
+
+POST /api/auth/register
+Registers a new therapist account.
+
+Body:
+json
+Copy code
+{
+  "email": "therapist@example.com",
+  "password": "securePassword123",
+  "name": "Therapist Name"
+}
+Response: Returns success or error message.
+POST /api/auth/login
+Logs in a user and initiates a session.
+
+Body:
+json
+Copy code
+{
+  "email": "therapist@example.com",
+  "password": "securePassword123"
+}
+Response: Access token or error message.
+2. Client Endpoints
+These routes handle client information and enable the creation and retrieval of client profiles.
+
+POST /api/clients
+Creates a new client profile.
+
+Body:
+json
+Copy code
+{
+  "name": "Alex Smith",
+  "dateOfBirth": "1993-05-10",
+  "gender": "Male",
+  "referralSource": "Primary Care Physician"
+}
+Response: Client ID and confirmation message.
+GET /api/clients
+Retrieves a list of clients, optionally filtered by therapist ID.
+
+Response:
+json
+Copy code
+[
+  {
+    "id": "client123",
+    "name": "Alex Smith",
+    "nextSession": "2023-11-02T10:00:00Z"
+  },
+  ...
+]
+GET /api/clients/[clientId]
+Retrieves details for a specific client.
+
+Response:
+json
+Copy code
+{
+  "id": "client123",
+  "name": "Alex Smith",
+  "dateOfBirth": "1993-05-10",
+  "gender": "Male",
+  "referralSource": "Primary Care Physician",
+  "sessions": [
+    { "sessionId": "session1", "date": "2023-11-02T10:00:00Z" },
+    ...
+  ]
+}
+3. Session Endpoints
+These routes handle session notes (DAP entries) for each client.
+
+POST /api/sessions
+Creates a new session note for a client.
+
+Body:
+json
+Copy code
+{
+  "clientId": "client123",
+  "date": "2023-11-02T10:00:00Z",
+  "data": {
+    "presentingProblem": "Persistent anxiety...",
+    "mentalStatus": "Calm but anxious...",
+    "appearance": "Slightly disheveled...",
+    "interventions": "Grounding exercises",
+    "response": "Receptive",
+    "screenerResults": "Moderate anxiety"
+  },
+  "assessment": {
+    "diagnosis": "Social Anxiety",
+    "selfHarmRisk": "Low",
+    "progress": "Awareness of triggers",
+    "goalChanges": "None"
+  },
+  "plan": {
+    "homework": "Daily journaling",
+    "referrals": null,
+    "takeaways": "Anxiety awareness",
+    "nextSession": "2023-11-09T10:00:00Z"
+  }
+}
+Response: Session ID and confirmation message.
+GET /api/sessions/[sessionId]
+Retrieves a specific session note.
+
+Response:
+json
+Copy code
+{
+  "sessionId": "session1",
+  "clientId": "client123",
+  "date": "2023-11-02T10:00:00Z",
+  "data": { ... },
+  "assessment": { ... },
+  "plan": { ... }
+}
+GET /api/clients/[clientId]/sessions
+Fetches all sessions for a given client, displayed in chronological order.
+
+Response:
+json
+Copy code
+[
+  {
+    "sessionId": "session1",
+    "date": "2023-11-02T10:00:00Z",
+    "summary": "Awareness of anxiety triggers..."
+  },
+  ...
+]
+4. Report Generation Endpoint
+GET /api/clients/[clientId]/report
+Generates a PDF report of all sessions for a specific client.
+
+Response: PDF file containing a structured summary of all sessions.
+MongoDB Schema Design
+For MongoDB, you’ll need collections for Users (therapists), Clients, and Sessions.
+
+User Collection
+
+json
+Copy code
+{
+  "_id": "user123",
+  "email": "therapist@example.com",
+  "passwordHash": "hashed_password",
+  "name": "Therapist Name",
+  "createdAt": "2023-01-10T12:00:00Z"
+}
+Client Collection
+
+json
+Copy code
+{
+  "_id": "client123",
+  "name": "Alex Smith",
+  "dateOfBirth": "1993-05-10",
+  "gender": "Male",
+  "referralSource": "Primary Care Physician",
+  "therapistId": "user123",
+  "createdAt": "2023-01-12T14:00:00Z"
+}
+Session Collection
+
+json
+Copy code
+{
+  "_id": "session1",
+  "clientId": "client123",
+  "date": "2023-11-02T10:00:00Z",
+  "data": { ... },
+  "assessment": { ... },
+  "plan": { ... },
+  "createdAt": "2023-11-02T10:50:00Z"
+}
+This setup will enable a comprehensive and secure DAP notes application where therapists can manage client progress efficiently. Let me know if you’d like more details on specific parts, such as code snippets or database indexing strategies.
